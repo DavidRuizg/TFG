@@ -1,0 +1,25 @@
+.mainBlock .download-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    margin-top: 0px;
+    padding: 0%;
+}
+
+.download-button {
+    width: 30px;
+    height: 30px;
+
+    border: none;
+    border-radius: 5px;
+
+    color: white;
+
+    margin: 10px;
+
+    text-align: center;
+}
+.download-button:hover {
+    background-color: #7777779f;
+}

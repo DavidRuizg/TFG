@@ -1,0 +1,90 @@
+/* Configure the menu to be a vertical panel with 20px */
+/* width, a gap of 8px between each item, a padding of 8px, */
+/* set to the left side of the screen */
+/* and a background color of #f1f1f1 */
+
+/* HEADER */
+.logo {
+    position: relative;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 10px;
+    padding-bottom: 30px;
+}
+.logo-img {
+    height: 150px;
+    width: 150px;
+
+    visibility: visible;
+    
+}.logo-img:hover {
+    animation: rotate 10s linear infinite;    
+}
+
+/* MENU AND BUTTONS */
+.menu {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.menu-main {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    width: 100%;
+}
+.menu-options {
+    /* Cambiar a visibility para transicion */
+    display: none;
+
+    position: relative; 
+
+    width: 100%;
+}
+
+.VertMenu button {
+    width: 100%;
+    cursor: pointer;
+
+    display: block;
+
+    background-color: #012f49   ;
+    color: white;
+    text-align: left;
+
+    font-size: large;
+
+    border: none;
+    padding: 14px;
+    padding-bottom: 16px;
+}
+button:hover {
+    background-color: #625c24;
+}
+
+.menu-main:hover .menu-options {
+    /* Cambiar a visibility para transicion */
+    display: block;
+}
+
+.VertMenu.hide header img {
+    display: none;
+}
+.VertMenu.hide .menu {
+    display: none;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
