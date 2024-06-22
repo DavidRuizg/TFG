@@ -1,0 +1,12 @@
+idf_component_register(
+    SRCS 
+        "main.c"
+        "wifi_connect.c"
+        "wifi_connect_err.c"
+        "mqtt_connect.c"
+        "websockets_connect.c"
+        "pzem004t_comm.c"
+        "i2c_relay_comm.c"
+        "sntp.c"
+    INCLUDE_DIRS 
+        ".")
