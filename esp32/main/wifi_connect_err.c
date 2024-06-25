@@ -2,6 +2,15 @@
 #include <string.h>
 #include "esp_wifi.h"
 
+/* Funcion que permite obtener el motivo de la desconexion de la red WiFi
+*
+*  Parametros:
+*  - wifi_err_reason: Motivo de la desconexion
+*
+*  Retorno:
+*  - Una cadena de caracteres con el motivo de la desconexion
+*
+*/
 char* get_wifi_disconnection_string(wifi_err_reason_t wifi_err_reason) 
 {
     switch (wifi_err_reason)

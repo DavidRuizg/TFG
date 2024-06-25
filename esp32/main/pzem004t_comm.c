@@ -9,6 +9,16 @@
 typedef u_int16_t WORD;
 typedef u_int8_t BYTE;
 
+/* Cálculo de CRC16 según la implementación de Modbus
+* 
+*  Parámetros:
+*  - nData: Puntero a los datos a calcular
+*  - wLength: Longitud de los datos
+* 
+*  Retorno:
+*  - wCRCWord: Valor del CRC16
+*
+*/
 WORD CRC16 (const BYTE *nData, WORD wLength) {
 	static const WORD wCRCTable[] = {
 	0X0000, 0XC0C1, 0XC181, 0X0140, 0XC301, 0X03C0, 0X0280, 0XC241,
@@ -57,20 +67,44 @@ WORD CRC16 (const BYTE *nData, WORD wLength) {
 
 }
 
+/* Función que genera el comando de lectura de valores
+*
+*  Parámetros:
+*  - data_frame: Puntero al buffer donde se almacenará el comando
+*  - length: Puntero a la longitud del comando
+*
+*  Retorno:
+*  - Entero con el estado de la operación (0 = OK)
+*
+*/
 int update_values_cmd(char* data_frame, int* length) {
+	// Comando de lectura de valores con dirección del esclavo, función, dirección de inicio y número de registros
 	BYTE data_to_write[] = {0x01, 0x04, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00};
 
+	// Cálculo del CRC16	
 	WORD crc = CRC16 (data_to_write, 6);
 	unsigned char high_part = (crc >> 8) & 0xFF;
 	unsigned char low_part = crc & 0xFF;
 
+	// Añadir el CRC16 al comando
 	data_to_write[6] = low_part;
 	data_to_write[7] = high_part;
+	// Copiar el comando al buffer de salida
 	memcpy(data_frame, data_to_write, sizeof(data_to_write));
 	*length = sizeof(data_to_write);
 	return 0;
 }
 
+/* Función que realiza la conversión de bytes de información a los valores de la respuesta del medidor
+*
+*  Parámetros:
+*  - dataframe: Puntero al buffer con la respuesta del medidor
+*  - power_values: Puntero a la estructura donde se almacenarán los valores
+*
+*  Retorno:
+*  - Entero con el estado de la operación (0 = OK)
+*
+*/
 int parse_values(char* dataframe, struct power_values_s* power_values) {
 		
 	    power_values->voltage = ((uint16_t)dataframe[3] << 8 | // Raw voltage in 0.1V

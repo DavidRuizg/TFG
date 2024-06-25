@@ -8,6 +8,19 @@
 static const char* TAG = "MQTT";
 static esp_mqtt_client_handle_t client;
 
+
+/* Manejador de eventos MQTT para cubrir los eventos de conexión, desconexión, suscripción, publicación, recepción de datos y errores
+*
+*  Parametros:
+*  - event_handler_arg: Argumentos del manejador de eventos
+*  - esp_event_base_t: Base del evento
+*  - event_id: Identificador del evento
+*  - event_data: Datos del evento
+*
+*  Retorno:
+*  Sin retorno
+*
+*/
 void mqtt_event_handler(void* event_handler_arg, esp_event_base_t event_base, 
                         int32_t event_id, void* event_data)
 {
@@ -41,6 +54,15 @@ void mqtt_event_handler(void* event_handler_arg, esp_event_base_t event_base,
     }
 }
 
+/* Función para inicializar la conexión MQTT
+*
+*  Parametros:
+*  Sin parametros de entrada
+*
+*  Retorno:
+*  Sin retorno
+*
+*/
 void mqtt_connect_init(void)
 {
     // Definir configuracion del cliente MQTT
@@ -56,18 +78,41 @@ void mqtt_connect_init(void)
     esp_mqtt_client_start(client);
 }
 
+/* Función para enviar un mensaje mediante MQTT
+*
+*  Parametros:
+*  - topic: Tema del mensaje
+*  - payload: Cuerpo del mensaje (datos)
+*
+*  Retorno:
+*  - ret: Estado de la operación
+*
+*/
 int mqtt_send(char* topic, char* payload)
 {
     return esp_mqtt_client_publish(client, topic, payload, strlen(payload), 0, 0);
 }
 
+/* Función para enviar los valores de los parámetros eléctricos mediante MQTT
+*
+*  Parametros:
+*  - esp32_id: Identificador del ESP32
+*  - power_values: Estructura con los valores de los parámetros eléctricos
+*
+*  Retorno:
+*  - Entero con el estado de la operación (0 = correcto)
+*
+*/
 int mqtt_send_telemetry(char* esp32_id, struct power_values_s* power_values)
 {
     ESP_LOGI(TAG, "Enviando valores mediante MQTT");
     char message[256];
+    // Definición de la base del tópico, se ampliará para adaptarse a cada tipo de medición
     char topic[256] = "iotsys/mediciones/casa1/";
     
-    // For every message, we need to add the ESP32 ID to the topic along with the message value type. Example of topic: iotsys/mediciones/casa1/esp32_id/Potencia
+    // Enviar los valores de los parámetros eléctricos mediante MQTT
+    // Se establece el tópico completo, con el identificador del ESP32
+    // Se envían los valores de Potencia, Voltaje, Intensidad, Energía, Frecuencia y Factor de Potencia
     ESP_LOGI(TAG, "Enviando valores de Potencia mediante MQTT");
     sprintf(topic, "iotsys/mediciones/casa1/%s/Potencia", esp32_id);
     sprintf(message, "%.2f", power_values->power);
@@ -101,8 +146,18 @@ int mqtt_send_telemetry(char* esp32_id, struct power_values_s* power_values)
     return 0;
 }
 
+/* Función para desconectar el cliente MQTT
+*
+*  Parametros:
+*  Sin parametros de entrada
+*
+*  Retorno:
+*  Sin retorno
+*
+*/
 void mqtt_disconnect(void)
 {
+    // Detener el cliente MQTT y limpiar la memoria
     ESP_ERROR_CHECK(esp_mqtt_client_stop(client));
     ESP_ERROR_CHECK(esp_mqtt_client_destroy(client));
 }

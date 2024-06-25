@@ -31,10 +31,17 @@ static const char *TAG = "MAIN";
 
 #define BUF_SIZE (1024)
 
+/* Tarea principal ejecutada por el programa, incluye la configuracion de la UART en primera instancia y la lectura periódica de datos del PZEM004T seguido del envio de estos mediante MQTT y Websockets 
+*
+*  Parametros:
+*  - arg: Argumentos de la tarea (no requeridos)
+*
+*  Retorno:
+*  Sin retorno
+*/
 static void main_task(void *arg)
 {
-    /* Configure parameters of an UART driver,
-     * communication pins and install the driver */
+    // Configuracion de UART estableciendo el baudrate, bits de datos, paridad, bits de parada, control de flujo y reloj de sincronización
     uart_config_t uart_config = {
         .baud_rate = UART_BAUD_RATE,
         .data_bits = UART_DATA_8_BITS,
@@ -48,26 +55,30 @@ static void main_task(void *arg)
 #if CONFIG_UART_ISR_IN_IRAM
     intr_alloc_flags = ESP_INTR_FLAG_IRAM;
 #endif
-
+    // Instalacion del driver de la UART
     ESP_ERROR_CHECK(uart_driver_install(UART_PORT_NUM, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags));
+    // Configuracion de los pines de la UART
     ESP_ERROR_CHECK(uart_param_config(UART_PORT_NUM, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin(UART_PORT_NUM, PIN_TXD, PIN_RXD, PIN_RTS, PIN_CTS));
 
-    // Configure a temporary buffer for the incoming data
+    // Buffer para los comandos y datos recibidos por la UART
     uint8_t *data = (uint8_t *) malloc(BUF_SIZE);
     int length;
     struct power_values_s power_values;
 
     while (true) 
     {
+        // Generar el comando de lectura de valores
         update_values_cmd((char*)data, &length);
+        // Enviar el comando por la UART
         uart_write_bytes(UART_PORT_NUM, data , length);
         ESP_LOGI(TAG, "Leyendo datos del PZEM004T mediante UART...");
-        // Read data from the UART
+        // Leer los datos recibidos por la UART 
         int len = uart_read_bytes(UART_PORT_NUM, data, (BUF_SIZE - 1), 1000 / portTICK_PERIOD_MS);
-        if (len > 0) 
+        if (len > 0)    // Si se recibieron datos
         {
             ESP_LOGI(TAG, "Recibido: %d bytes", len);
+            // Convertir los datos a valores de los parámetros eléctricos
             parse_values((char*)data, &power_values);
 
             // Convertir los valores a un mensaje JSON y envio mediante websockets
@@ -81,8 +92,15 @@ static void main_task(void *arg)
     }
 }
 
-// Proceso principal del programa
-// Conecta a una red wifi para enviar mensajes a mosquitto broker mediante MQTT y enviar mensajes a una aplicación web mediante HTTP
+/* Proceso principal del programa. Realiza configuraciones iniciales para conexión Wi-Fi, SNTP, MQTT, Websockets e I2C, y crea las tareas necesarias para la ejecución del programa
+*
+*  Parametros:
+*  Sin parametros de entrada
+*
+*  Retorno:
+*  Sin retorno
+*
+*/
 void app_main(void)
 {
     // Inicializar la memoria de almacenamiento no volátil
