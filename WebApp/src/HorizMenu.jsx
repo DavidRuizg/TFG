@@ -1,4 +1,8 @@
+// Función que define un panel horizontal con información de contacto
 export function HorizMenu() {
+  // Estrucutra del panel horizontal
+  // Icono representando el medio de contacto
+  // Información descriptiva del contacto
   return (
     <div className='HorizMenu'>
       <div className="info">

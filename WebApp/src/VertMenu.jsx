@@ -1,12 +1,16 @@
-/* eslint-disable react/prop-types */
-
+// Función que define el componente que representa el menú vertical de la aplicación
 export function VertMenu({ onClick, menuView }) {
+  // Renderización del menú vertical definido la estructura del componente
+  // Estructura del menú vertical:
+  // - Logo de la aplicación
+  // - Opciones de menú: Inicio, Servicios, Información
+  // - Subopciones de menú: Datos, Gráficas, Control cargas
   return (
     <article className={menuView}>
       <header  className="logo">
         <img className="logo-img" src="src\assets\logo.png" />
       </header>
-
+        
       <div className="menu">
         <div className="menu-main">     
           <button onClick={() => onClick('Inicio')}>Inicio</button>

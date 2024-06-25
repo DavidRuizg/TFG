@@ -9,24 +9,29 @@ import './HorizMenu.css'
 import './DownloadButton.css';
 import './Graph.jsx';
 
+// Función para el renderizado de la sección principal de la aplicación
 export function Panel({ currentView, panelView }) {
+  // Llamada al Hook personalizado para la conexión con el servidor WebSocket, pasando como argumento la dirección del servidor
   const {socket, receivedData} = useWebSocket('ws://192.168.216.210:8080/');
-  
+  // Declaración del estado que almacenará los datos recibidos del servidor
   const [tableData, setTableData] = useState([]);
-
+  // Declaración de los estados que almacenarán el estado de los relés para la modificación de la apariencia de los botones de la interfaz
   const [relay0State, setRelay0State] = useState("control-button off");
   const [relay1State, setRelay1State] = useState("control-button off");
   const [relay2State, setRelay2State] = useState("control-button off");
   const [relay3State, setRelay3State] = useState("control-button off");
 
+  // Hook que se ejecuta cuando se recibe un mensaje del servidor
   useEffect(() => {
+    // En caso de mensaje vacío o conversión incorrecta, no se hace nada
     if (receivedData === null) {
       return;
     }
-    if (receivedData.Type === 'data') {
+    // En caso de recibir un mensaje, se comprueba el tipo de mensaje
+    if (receivedData.Type === 'data') {   // En caso de recibir datos, se añaden a la tabla de datos
       setTableData((prevData) => [...prevData, receivedData]);
     }
-    else if (receivedData.Type === 'state') {
+    else if (receivedData.Type === 'state') {   // En caso de recibir un mensaje de estado, se actualiza el estado de los relés y la apariencia de los botones
       if (receivedData.State === 0) {
         (receivedData.Relay === 0) ? setRelay0State("control-button off") :
         (receivedData.Relay === 1) ? setRelay1State("control-button off") :
@@ -44,16 +49,18 @@ export function Panel({ currentView, panelView }) {
       }
     }
 
-    return () => {
+    return () => {    // No se realiza ninguna acción de limpieza
     };
   }, 
   [receivedData]);
 
+  // Función para enviar mensajes de tipo orden al servidor, para controlar el estado de los relés
   const sendMessage = (relay, state) => {
       socket.send(`{"Type": "order", "Relay": ${relay}, "State": ${state}}`);
   }
 
   console.log(`Rendering content for: ${currentView}`);
+  // Función para renderizar el contenido de la sección principal de la aplicación, alternando entre las diferentes vistas en función de la selección del usuario pasada como característica del componente
   const renderContent = () => {
     switch (currentView) {
       case 'Inicio':
@@ -270,6 +277,7 @@ export function Panel({ currentView, panelView }) {
     }
   };
 
+    // Renderizado de la sección principal de la aplicación
     return (
       <div>
         {renderContent()}
